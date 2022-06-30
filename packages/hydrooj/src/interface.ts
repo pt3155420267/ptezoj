@@ -111,6 +111,14 @@ export interface UserPreferenceDoc {
 
 export type ownerInfo = { owner: number, maintainer?: number[] };
 
+/* HGNUOJ 学生信息 */
+export interface Student extends Dictionary<any> {
+    _id: number,
+    name: string,
+    stuid: string,
+    class: string
+}
+
 export type User = import('./model/user').User;
 export type Udict = NumericDictionary<User>;
 
@@ -585,6 +593,7 @@ export interface Collections {
     'document.status': any;
     'problem': ProblemDoc;
     'user': Udoc;
+    'stu.info': Student;
     'user.preference': UserPreferenceDoc;
     'vuser': VUdoc;
     'user.group': GDoc;
@@ -605,6 +614,7 @@ export interface Collections {
 }
 
 export interface Model {
+    student: typeof import('./model/stuinfo').default;
     blacklist: typeof import('./model/blacklist').default,
     blog: typeof import('./model/blog'),
     builtin: typeof import('./model/builtin'),

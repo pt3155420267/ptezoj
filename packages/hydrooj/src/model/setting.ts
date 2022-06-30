@@ -133,6 +133,12 @@ PreferenceSetting(
 );
 
 AccountSetting(
+    Setting('setting_student', 'stuid', '', 'text', 'Stu_ID',
+        '', undefined, (s) => /^[0-9]*$/.test(s)),
+    Setting('setting_student', 'name', '', 'text', 'Stu_RealName',
+        '', undefined, (s) => /^[\u4E00-\u9FA5]{2,4}$/.test(s)),
+    Setting('setting_student', 'class', null, 'text', 'Stu_ClassName',
+        '', undefined, (s) => /^[\u4e00-\u9FA5]{0,}$/.test(s)),
     Setting('setting_info', 'avatar', '', 'text', 'Avatar',
         'Allow using gravatar:email qq:id github:name url:link format.'),
     Setting('setting_info', 'qq', null, 'text', 'QQ'),
@@ -153,6 +159,7 @@ DomainSetting(
     Setting('setting_domain', 'share', '', 'text', 'Share problem with domain (* for any)'),
     Setting('setting_domain', 'bulletin', '', 'markdown', 'Bulletin'),
     Setting('setting_domain', 'langs', '', 'text', 'Allowed langs', null),
+    Setting('setting_domain', 'publicToCourses', false, 'boolean', '公开到课程页面', null),
     Setting('setting_storage', 'host', '', 'text', 'Custom host', null, FLAG_HIDDEN | FLAG_DISABLED),
 );
 

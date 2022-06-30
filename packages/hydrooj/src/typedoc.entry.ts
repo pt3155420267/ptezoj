@@ -18,6 +18,7 @@ import task from './model/task';
 import token from './model/token';
 import * as training from './model/training';
 import user from './model/user';
+import * as stuinfo from './model/stuinfo';
 
 export const Interface = interfaces;
 
@@ -41,4 +42,5 @@ export namespace Model {
     export const Oauth = oauth;
     export const Discussion = discussion;
     export const Message = message;
+    export const StuInfo = stuinfo;
 }

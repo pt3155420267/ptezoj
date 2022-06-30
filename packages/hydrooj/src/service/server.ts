@@ -151,6 +151,8 @@ ${ctx.response.status} ${endTime - startTime}ms ${ctx.response.length}`);
 }
 
 export class HandlerCommon {
+    extraTitleContent?: string;
+    
     render: (name: string, args?: any) => Promise<void>;
     renderHTML: (name: string, args?: any) => Promise<string>;
     url: (name: string, args?: any) => string;
