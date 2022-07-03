@@ -268,9 +268,6 @@ const oi = buildContestRule({
                         raw: [{
                             value: tsddict[pid]?.score ?? '-',
                             raw: tsddict[pid]?.rid || null,
-                        }, {
-                            value: psdict[index]?.score ?? '-',
-                            raw: psdict[index]?.rid ?? null,
                         }],
                     } : {
                         type: 'record',

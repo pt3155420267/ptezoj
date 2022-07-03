@@ -1,6 +1,19 @@
 <div class="section visible" id="status">
   <div class="section__header">
     <h1 class="section__title">
+      {% if model.builtin.STATUS_TEXTS[rdoc['status']] == 'System Error' %}
+      <blockquote class="note">若评测出现System Error，为系统问题，请勿重复提交，待管理员解决。</blockquote>
+      {% elif model.builtin.STATUS_TEXTS[rdoc['status']] == 'Runtime Error' %}
+      <blockquote class="note">若评测出现Runtime Error，则表明程序运行过程中出现了崩溃，Python语言请检查是否存在语法错误，上述都没有问题后请检查代码有无下标越界或无限递归爆栈的情况。</blockquote>
+      {% elif model.builtin.STATUS_TEXTS[rdoc['status']] == 'Compile Error' %}
+      <blockquote class="note">若评测出现Compile Error，则表明程序编译出错，请检查代码有无语法错误。</blockquote>
+      {% elif model.builtin.STATUS_TEXTS[rdoc['status']] == 'Wrong Answer' %}
+      <blockquote class="note">若评测出现Wrong Answer，表明程序未通过所有测试用例，请检查代码有无错误。</blockquote>
+      {% elif model.builtin.STATUS_TEXTS[rdoc['status']] == 'Time Exceeded' %}
+      <blockquote class="note">若评测出现Time Exceeded，表明程序未在规定时间内运行结束，请检查代码有无错误或改写时间复杂度更低的算法。</blockquote>
+      {% elif model.builtin.STATUS_TEXTS[rdoc['status']] == 'Waiting' %}
+      <blockquote class="note">评测排队中，请稍等...若长时间Waiting且刷新无变化，请向管理员反馈。</blockquote>
+      {% endif %}
       <span class="icon record-status--icon {{ model.builtin.STATUS_CODES[rdoc['status']] }}"></span>
       <span style="color: {{ utils.status.getScoreColor(rdoc.score|default(0)) }}">{{ rdoc.score|default(0) }}</span>
       <span class="record-status--text {{ model.builtin.STATUS_CODES[rdoc['status']] }}">

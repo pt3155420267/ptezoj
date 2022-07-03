@@ -21,6 +21,8 @@
   {% block ogp %}
   <meta property="og:site_name" content="{{ (handler.domain|default({ui:[]})).ui.name|default(model.system.get('server.name')) }}" />
   <meta property="og:title" content="{{ handler.renderTitle(page_name) }}" />
+  <meta name="keywords" content="莆田二中信息学竞赛,莆田二中信息学竞赛在线评测系统,莆田第二中学,莆田二中算协,莆二信竞">
+  <meta name="description" content="莆田二中信息学竞赛在线评测系统创办于2021年,致力为莆田市信息学竞赛选手提供良好的编程体验与做题平台，拥有强大的判题系统和良好的社区氛围，内容广泛，无论是新手还是神犇均可从中获益，也可以帮助他人，共同进步。">
   <meta property="og:url" content="{{ model.system.get('server.url') }}{{ handler.ctx.request.path.slice(1) }}" />
   <meta property="og:image" content="{{ static_url('favicon-96x96.png') }}" />
   {% endblock %}
@@ -50,6 +52,7 @@
         document.head.appendChild(s);
       }
     </script>
+    <style>.section{border-radius:12px}</style>
   {% endif %}
 </head>
 <body>

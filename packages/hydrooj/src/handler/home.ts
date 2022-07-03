@@ -94,6 +94,17 @@ export class HomeHandler extends Handler {
         return [];
     }
 
+    async getLatestProblems(domainId: string, limit = 5) {
+        if (this.user.hasPerm(PERM.PERM_VIEW_PROBLEM)) {
+            const pdocs = await ProblemModel.getMulti(domainId, { hidden: false })
+                .sort({ _id: -1 }).limit(limit).toArray();
+            const uids = pdocs.map((pdoc) => pdoc.owner);
+            this.collectUser(uids);
+            return ['latestProblems', pdocs];
+        }
+        return ['latestProblems', []];
+    }
+
     async getStarredProblems(domainId: string, limit = 50) {
         if (this.user.hasPerm(PERM.PERM_VIEW_PROBLEM)) {
             const psdocs = await ProblemModel.getMultiStatus(domainId, { uid: this.user._id, star: true })

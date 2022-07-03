@@ -22,16 +22,6 @@
         {% endif %}
       </div>
     </div>
-    <div class="section">
-      <div class="section__body typo">
-        {{ tdoc['content']|markdown|safe }}
-      {% if model.contest.isOngoing(tdoc, tsdoc) %}
-        <blockquote class="warn">
-          <p>{{ _('We will check code similarity after this contest.') }}</p>
-        </blockquote>
-      {% endif %}
-      </div>
-    </div>
   {% if model.contest.isOngoing(tdoc, tsdoc) or model.contest.isDone(tdoc, tsdoc) %}
     <div class="section">
       <div class="section__header">
@@ -86,6 +76,16 @@
     {% endif %}
     </div>
   {% endif %}
+    <div class="section">
+      <div class="section__body typo">
+        {{ tdoc['content']|markdown|safe }}
+      {% if model.contest.isOngoing(tdoc, tsdoc) %}
+        <blockquote class="note">
+          <p>比赛已经开始！</p>
+        </blockquote>
+      {% endif %}
+      </div>
+    </div>
   </div>
   <div class="medium-3 columns">
   {% set owner_udoc = udict[tdoc.owner] %}
