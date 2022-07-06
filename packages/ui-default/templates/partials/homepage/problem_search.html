@@ -2,7 +2,7 @@
     window.onload = function() {
         setInterval(function() {
             var nowTime = new Date();
-            var endTime = new Date("2022-5-08 09:30:00");
+            var endTime = new Date("2023-1-16 08:30:00");
 			var endTime2 = new Date("2022-9-18 09:30:00");
 			var endTime3 = new Date("2022-10-22 08:30:00");
 			var endTime4 = new Date("2022-11-19 08:30:00");
@@ -38,7 +38,8 @@
 			var s4 = parseInt(seconds4 % 60);
             var s5 = parseInt(seconds5 % 60);
             var s6 = parseInt(seconds6 % 60);
-            document.getElementById("djs").innerHTML =  "CSP - J/S 2022 第一轮认证 " + "<br>" + d2 +" 天 " + h2 + " 小时 " + m2 + " 分钟 " + s2 + " 秒" + "<br>" + "<br>"
+            document.getElementById("djs").innerHTML =  "<b>" + "2023年1月福建省普通高中学业水平合格性考试" + "</b> "+ "<br>" + d +" 天 " + h + " 小时 " + m + " 分钟 " + s + " 秒" + "<br>" + "<br>"
+            + "CSP - J/S 2022 第一轮认证 " + "<br>" + d2 +" 天 " + h2 + " 小时 " + m2 + " 分钟 " + s2 + " 秒" + "<br>" + "<br>"
 			+ "CSP - J/S 2022 第二轮认证 " + "<br>" + d3 +" 天 " + h3 + " 小时 " + m3 + " 分钟 " + s3 + " 秒" + "<br>" + "<br>"
 			+ "NOIP 2022" + "<br>" + "(全国青少年信息学奥林匹克联赛) " + "<br>" + d4 +" 天 " + h4 + " 小时 " + m4 + " 分钟 " + s4 + " 秒";
         }, 1000);
