@@ -92,8 +92,8 @@ Begin at: 开始于
 Begin Date: 开始日期
 Begin Time: 开始时间
 Belongs to: 属于
-Bio Visibility: 个人简介可见性
-Bio: 个人简介
+Bio Visibility: 奖项认证可见性
+Bio: 奖项认证
 Blog: 博客
 Bold: 加粗
 Boom!: 炸了！
@@ -245,10 +245,10 @@ Discussion node {1} not found.: 讨论节点 {1} 不存在。
 Discussion Nodes: 讨论节点
 discussion_create: 创建讨论
 discussion_edit: 编辑讨论
-discussion_main: 讨论
-discussion_node: 讨论
-Discussion: 讨论
-Discussions: 讨论
+discussion_main: 公告
+discussion_node: 公告
+Discussion: 公告
+Discussions: 公告
 Display name {1} you want to set is used by others.: 您想要设置的显示名 {1} 已经被其他人使用了。
 Display Name: 显示名
 display_name: 显示名
