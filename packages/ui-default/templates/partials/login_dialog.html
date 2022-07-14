@@ -13,6 +13,12 @@
           <a name="dialog--signin__close" href="javascript:;">{{ _('CLOSE') }}</a>
         </div>
         <h1 class="dialog--signin__title">{{ _('SIGN IN') }}</h1>
+        <blockquote class="warn">
+        <p>温馨提示:</p>
+        <p>莆田二中2021级的学生,请使用分班前的班级座号登录平台!</p>
+        <br>
+        <p>新班级暂时还未更新上服务器,平台数据暂未迁移至新账号,如已更新将会第一时间通知,敬请谅解.</p>
+        </blockquote>
         <p class="dialog--signin__note">{{ _('Using your {0} universal account').format(model.system.get('server.name')) }}</p>
         {% if model.system.get('server.login') %}
         <div class="row"><div class="columns">
