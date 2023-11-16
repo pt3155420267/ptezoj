@@ -306,13 +306,13 @@ class UserRegisterWithCodeHandler extends Handler {
     @param('code', Types.String)
     async post(
         domainId: string, password: string, verify: string,
-        uname: string, code: string,
+        uname: string, school: string, realname: string, code: string,
     ) {
         const tdoc = await token.get(code, token.TYPE_REGISTRATION);
         if (!tdoc || (!tdoc.mail && !tdoc.phone)) throw new InvalidTokenError(token.TYPE_TEXTS[token.TYPE_REGISTRATION], code);
         if (password !== verify) throw new VerifyPasswordError();
         if (tdoc.phone) tdoc.mail = `${String.random(12)}@hydro.local`;
-        const uid = await user.create(tdoc.mail, uname, password, undefined, this.request.ip);
+        const uid = await user.create(tdoc.mail, uname, password, school, realname, undefined, this.request.ip);
         await token.del(code, token.TYPE_REGISTRATION);
         const [id, mailDomain] = tdoc.mail.split('@');
         const $set: any = tdoc.set || {};

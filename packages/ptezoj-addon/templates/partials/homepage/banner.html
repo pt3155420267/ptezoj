@@ -1,0 +1,55 @@
+<link rel="stylesheet" href="https://cdn.ptezoj.com/swiper/swiper-bundle.min.css">
+<style>
+    .swiper {
+        wight:100%
+    }  
+</style>
+<div class="section visible">
+  <div class="section__body">
+    <div class="swiper">
+      <div class="swiper-wrapper">
+        {% if payload.pics %}
+          {% for banner in payload.pics %}
+            {% if banner.url %}
+              <div class="swiper-slide">
+                <a href="{{banner.url}}"><img src="{{banner.pic}}" style="width: 100%"></a>
+              </div>
+            {% else %}
+              <div class="swiper-slide">
+                <img src="{{banner.pic}}" style="width: 100%">
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endif %}
+      </div>
+      <div class="swiper-pagination"></div>
+      <div class="swiper-button-prev"></div>
+      <div class="swiper-button-next"></div>
+    </div>
+  </div>
+</div>
+<script src="https://cdn.ptezoj.com/swiper/swiper-bundle.min.js"></script>
+<script>        
+  var mySwiper = new Swiper ('.swiper', {
+    loop: true,
+
+    autoplay: {
+        delay: 4000,
+        stopOnLastSlide: false,
+        disableOnInteraction: true,
+    },
+
+    pagination: {
+      el: '.swiper-pagination',
+    },
+    
+    navigation: {
+      nextEl: '.swiper-button-next',
+      prevEl: '.swiper-button-prev',
+    },
+    
+    scrollbar: {
+      el: '.swiper-scrollbar',
+    },
+  })        
+</script>

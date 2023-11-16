@@ -1,0 +1,21 @@
+{
+  "name": "ptezoj-addon",
+  "version": "0.0.1",
+  "description": "PTEZOJ-addon",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pt3155420267/ptezoj-addon.git"
+  },
+  "keywords": [
+    "hydrooj"
+  ],
+  "author": "pt3155420267",
+  "license": "AGPL-3.0-or-later",
+  "dependencies": {
+    "moment": "^2.29.1"
+  }
+}
