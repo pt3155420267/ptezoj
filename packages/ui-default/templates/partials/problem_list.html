@@ -68,7 +68,25 @@
           {{ problem.render_problem_title(pdoc) }}
         </td>
         <td class="col--ac-tried">{{ pdoc.nAccept }} / {{ pdoc.nSubmit }}</td>
-        <td class="col--difficulty">{{ pdoc['difficulty'] or lib.difficulty(pdoc.nSubmit, pdoc.nAccept) or _('(None)') }}</td>
+        <td class="col--difficulty">
+        {% if pdoc['difficulty'] == 1 %}
+          <span class="difficulty-tag" style="background: rgb(254, 76, 97); color: rgb(255, 255, 255);">入门</span>
+        {% elif pdoc['difficulty'] == 2 %}
+          <span class="difficulty-tag" style="background: rgb(243, 156, 17); color: rgb(255, 255, 255);">普及−</span>
+        {% elif pdoc['difficulty'] == 3 %}
+          <span class="difficulty-tag" style="background: rgb(255, 193, 22); color: rgb(255, 255, 255);">普及/提高−</span>
+        {% elif pdoc['difficulty'] == 4 %}
+          <span class="difficulty-tag" style="background: rgb(82, 196, 26); color: rgb(255, 255, 255);">普及+/提高</span>
+        {% elif pdoc['difficulty'] == 5 %}
+          <span class="difficulty-tag" style="background: rgb(52, 152, 219); color: rgb(255, 255, 255);">提高+/省选−</span>
+        {% elif pdoc['difficulty'] == 6 %}
+          <span class="difficulty-tag" style="background: rgb(157, 61, 207); color: rgb(255, 255, 255);">省选/NOI−</span>
+        {% elif pdoc['difficulty'] == 7 %}
+          <span class="difficulty-tag" style="background: rgb(14, 29, 105); color: rgb(255, 255, 255);">NOI/NOI+/CTSC</span>
+        {% else %}
+          <span class="difficulty-tag" style="background: rgb(191, 191, 191); color: rgb(255, 255, 255);">暂无评定</span>
+        {% endif %}
+        </td>
       </tr>
     {%- endfor -%}
     </tbody>
