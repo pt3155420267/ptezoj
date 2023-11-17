@@ -6,6 +6,10 @@
     <h1 class="section__title" data-heading>{{ _('Import User') }}</h1>
   </div>
   <div class="section__body">
+    导入格式：邮箱,用户名,密码,学校,真实姓名<br>
+    例子：3155420267@qq.com,ptez庄瑜,123456,莆田第二中学,庄瑜
+  </div>
+  <div class="section__body">
     {{ noscript_note.render() }}
     <p name="messages"></p>
     {{ form.form_textarea({

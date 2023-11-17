@@ -134,6 +134,7 @@ export interface BaseUser {
     mail: string;
     avatar: string;
     school?: string;
+    realname?: string;
     displayName?: string;
     studentId?: string;
 }
