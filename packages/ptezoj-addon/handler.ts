@@ -45,7 +45,7 @@ HomeHandler.prototype.geBanner = async (domainId, payload) => {
 }
 
 export function apply(ctx: Context) {
-    ctx.on('handler/before/UserLogin#post', async (that) => {
+    ctx.on('handler/after/UserLogin#post', async (that) => {
         let udoc = await UserModel.getByEmail(that.args.domainId, that.args.uname);
         if (!udoc) udoc = await UserModel.getByUname(that.args.domainId, that.args.uname);
         if (udoc) {
