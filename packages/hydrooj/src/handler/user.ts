@@ -120,6 +120,7 @@ class UserLoginHandler extends Handler {
         udoc.checkPassword(password);
         await user.setById(udoc._id, { loginat: new Date(), loginip: this.request.ip });
         if (!udoc.hasPriv(PRIV.PRIV_USER_PROFILE)) throw new BlacklistedError(uname, udoc.banReason);
+        token.delByUid(udoc._id);
         this.session.viewLang = '';
         this.session.uid = udoc._id;
         this.session.sudo = null;
