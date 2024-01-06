@@ -87,7 +87,7 @@ export interface KoaContext extends Koa.Context {
     request: Koa.Request & { body: any, files: Files };
     session: Record<string, any>;
     render: (name: string, args: any) => Promise<void>;
-    renderHTML: (name: string, args: any) => Promise<string>;
+    renderHTML: (name: string, args: any) => string | Promise<string>;
     getUrl: (name: string, args: any) => string;
     translate: (key: string) => string;
 }
@@ -115,7 +115,7 @@ const ignoredLimit = `,${argv.options.ignoredLimit},`;
 
 export class HandlerCommon {
     render: (name: string, args?: any) => Promise<void>;
-    renderHTML: (name: string, args?: any) => Promise<string>;
+    renderHTML: (name: string, args?: any) => string | Promise<string>;
     url: (name: string, args?: any) => string;
     translate: (key: string) => string;
     session: Record<string, any>;
@@ -124,8 +124,8 @@ export class HandlerCommon {
     ctx: Context = global.app;
 
     constructor(
-        public context: KoaContext, public args: Record<string, any>,
-        public request: HydroRequest, public response: HydroResponse,
+        public context: KoaContext, public readonly args: Record<string, any>,
+        public readonly request: HydroRequest, public response: HydroResponse,
         public user: User, public domain: DomainDoc, public UiContext: Record<string, any>,
     ) {
         this.render = context.render.bind(context);
@@ -348,7 +348,7 @@ export class ConnectionHandler extends HandlerCommon {
 
     send(data: any) {
         this.conn.send(JSON.stringify(data, serializer({
-            showDisplayName: this.user?.hasPerm(PERM.PREM_VIEW_DISPLAYNAME),
+            showDisplayName: this.user?.hasPerm(PERM.PERM_VIEW_DISPLAYNAME),
         })));
     }
 
@@ -396,7 +396,7 @@ export function Connection(
             for (const { name, target } of h.__subscribe || []) disposables.push(bus.on(name, target.bind(h)));
             let lastHeartbeat = Date.now();
             let closed = false;
-            let interval: NodeJS.Timer;
+            let interval: NodeJS.Timeout;
             const clean = () => {
                 if (closed) return;
                 closed = true;
