@@ -100,14 +100,15 @@ Hydro 同时支持 VJudge，这意味着你可以直接在系统内导入其他�
 当前支持的平台有：  
 
 - [一本通编程启蒙](https://hydro.ac/ybtbas.zip)：官方提供一本通编程启蒙题库，免费使用，参照压缩包内导入说明。
-- [Codeforces](https://codeforces.com)：国外大型竞赛平台，大量高质量题目；
+- [深入浅出程序设计竞赛](https://hydro.ac/srqc.zip)：官方提供洛谷《深入浅出程序设计竞赛(基础篇)》配套题库，免费使用，参照压缩包内导入说明。
 - [UOJ](https://uoj.ac)：国内知名 OJ，国家集训队常用；
-- [SPOJ](https://www.spoj.com)：国内连接很不稳定，不推荐；
+- [Codeforces](https://codeforces.com)：国外大型竞赛平台，大量高质量题目；
 - [洛谷](https://www.luogu.com.cn)：使用此功能需要向洛谷购买授权；
 - [HDUOJ](https://acm.hdu.edu.cn)：杭州电子科技大学在线评测系统，其中包含多校训练题；
 - [CSGOJ](https://cpc.csgrandeur.cn)：广东省赛与湖南省赛赛题评测平台；
+- [SPOJ](https://www.spoj.com)：国内连接很不稳定，不推荐；
 - [POJ](https://poj.org)：较为古董，服务器稳定性差；
-- [YACS](https://iai.sh.cn)：上海市计算机学会竞赛平台；
+- [YACS](https://iai.sh.cn)：上海市计算机学会竞赛平台，单账号每日提交有限制；
 - HUSTOJ：理论上支持所有 HUSTOJ 驱动的系统，但由于各个系统中 UI 有差异，通常需要手动适配。
 
 ### 多赛制支持
@@ -566,13 +567,17 @@ Telegram [@undefinedmoe](https://t.me/undefinedmoe)
 1. 您可以在遵守 AGPL-3.0 许可证和下述附加条款章节的前提下免费使用这些代码：  
 2. 如确需闭源，您也可以联系我们购买其他授权。
 
-在您部署 Hydro 时，需要保留底部的 `Powered by Hydro` 字样，其中的 `Hydro` 字样需指向 `hydro.js.org/本仓库/fork` 之一的链接。  
-若您对源码做出修改/扩展，同样需要以 AGPL-3.0-or-later 开源，您可以以 `Powered by Hydro, Modified by xxx` 格式在页脚注明。  
-
 ### 附加条款
 
-1. 不可移除本项目的版权声明；（[AGPL3 7(b)](LICENSE#L356)）
+基于 AGPL3 协议第七条，您在使用本项目时，需要遵守以下额外条款：
+
+1. 不可移除本项目的版权声明与作者/来源署名；（[AGPL3 7(b)](LICENSE#L356)）
 2. 当重分发经修改后的本软件时，需要在软件名或版本号中采用可识别的方式进行注明；（[AGPL3 7(c)](LICENSE#L360)）
+3. 除非得到许可，不得以宣传为目的使用作者姓名；（[AGPL3 7(d)](LICENSE#364)）
+
+即：  
+在您部署 Hydro 时，需要保留底部的 `Powered by Hydro` 字样，其中的 `Hydro` 字样需指向 `hydro.js.org/本仓库/fork` 之一的链接。  
+若您对源码做出修改/扩展，同样需要以 AGPL-3.0-or-later 开源，您可以以 `Powered by Hydro, Modified by xxx` 格式在页脚注明。  
 
 ## 贡献代码
 
