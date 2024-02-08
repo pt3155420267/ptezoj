@@ -855,6 +855,7 @@ export class ContestSimHandler extends ContestManagementBaseHandler {
                 const user2 = arr[i][3];
                 const record2 = arr[i][5];
                 const similarity = arr[i][6];
+                if (user1 === user2) continue;
                 coll.insertOne({
                     _id: new ObjectId(),
                     contest: tid,
