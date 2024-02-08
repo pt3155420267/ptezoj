@@ -93,6 +93,17 @@ export interface Udoc extends Record<string, any> {
     loginip: string;
 }
 
+export interface SIMdoc extends Record<string, any> {
+    _id: ObjectId;
+    contest: ObjectId;
+    user1: number;
+    record1: ObjectId;
+    user2: number;
+    record2: ObjectId;
+    similarity: number;
+    status: number;
+}
+
 export interface VUdoc {
     _id: number;
     mail: string;
@@ -709,6 +720,7 @@ declare module './service/db' {
         'opcount': OpCountDoc;
         'schedule': Schedule;
         'contest.balloon': ContestBalloonDoc;
+        'sim': SIMdoc;
     }
 }
 

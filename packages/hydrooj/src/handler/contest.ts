@@ -1,8 +1,11 @@
+import { exec } from 'child_process';
 import AdmZip from 'adm-zip';
-import { statSync } from 'fs-extra';
+import {
+    copyFile, emptyDir, ensureDir, outputFile, readFileSync, statSync,
+} from 'fs-extra';
 import { pick } from 'lodash';
 import moment from 'moment-timezone';
-import { ObjectId } from 'mongodb';
+import { Collection, ObjectId } from 'mongodb';
 import {
     Counter, sortFiles, streamToBuffer, Time, yaml,
 } from '@hydrooj/utils/lib/utils';
@@ -10,9 +13,10 @@ import { Context } from '../context';
 import {
     BadRequestError, ContestNotAttendedError, ContestNotEndedError, ContestNotFoundError, ContestNotLiveError,
     ContestScoreboardHiddenError, FileLimitExceededError, FileUploadError,
+    ForbiddenError,
     InvalidTokenError, NotAssignedError, PermissionError, ValidationError,
 } from '../error';
-import { ScoreboardConfig, Tdoc } from '../interface';
+import { ScoreboardConfig, SIMdoc, Tdoc } from '../interface';
 import { PERM, PRIV, STATUS } from '../model/builtin';
 import * as contest from '../model/contest';
 import * as discussion from '../model/discussion';
@@ -25,10 +29,13 @@ import ScheduleModel from '../model/schedule';
 import storage from '../model/storage';
 import * as system from '../model/system';
 import user from '../model/user';
+import db from '../service/db';
 import {
     Handler, param, post, Types,
 } from '../service/server';
 import { registerResolver, registerValue } from './api';
+
+export const coll: Collection<SIMdoc> = db.collection('sim');
 
 registerValue('Contest', [
     ['_id', 'ObjectID!'],
@@ -761,6 +768,111 @@ export class ContestBalloonHandler extends ContestManagementBaseHandler {
     }
 }
 
+export class ContestSimHandler extends ContestManagementBaseHandler {
+    @param('tid', Types.ObjectId)
+    async get(domainId: string, tid: ObjectId) {
+        this.response.template = 'contest_sim.html';
+        this.response.pjax = 'contest_sim.html';
+        const sdocs = await coll.find({ contest: tid }).toArray();
+        const [udict1] = await Promise.all([user.getList(domainId, sdocs.map((sdoc) => sdoc.user1))]);
+        const [udict2] = await Promise.all([user.getList(domainId, sdocs.map((sdoc) => sdoc.user2))]);
+        this.response.body = {
+            sdocs,
+            udict1,
+            udict2,
+        };
+    }
+
+    @param('tid', Types.ObjectId)
+    async postGenerate(domainId: string, tid: ObjectId) {
+        await this.limitRate('contest_sim_generate', 60, 1);
+        try {
+            await ensureDir('simtmp');
+            await emptyDir('simtmp');
+            await copyFile('sim/sim_c++', 'simtmp/sim');
+            await copyFile('sim/process', 'simtmp/process');
+
+            // eslint-disable-next-line @typescript-eslint/no-unused-vars
+            const [tdoc, tsdocs] = await contest.getAndListStatus(domainId, tid);
+            const rnames = {};
+            for (const tsdoc of tsdocs) {
+                for (const j of tsdoc.journal || []) {
+                    let name = `U${tsdoc.uid}_P${j.pid}_R${j.rid}`;
+                    if (typeof j.score === 'number') name += `_S${j.status || 0}@${j.score}`;
+                    rnames[j.rid] = name;
+                }
+            }
+            const zip = new AdmZip();
+            const rdocs = await record.getMulti(domainId, {
+                _id: { $in: Array.from(Object.keys(rnames)).map((id) => new ObjectId(id)) },
+            }).toArray();
+            await Promise.all(rdocs.map(async (rdoc) => {
+                if (rdoc.files?.code) {
+                    const [id, filename] = rdoc.files?.code?.split('#') || [];
+                    if (!id) return;
+                    zip.addFile(
+                        `${rnames[rdoc._id.toHexString()]}.${filename || 'txt'}`,
+                        await streamToBuffer(await storage.get(`submission/${id}`)),
+                    );
+                } else if (rdoc.code) {
+                    zip.addFile(`${rnames[rdoc._id.toHexString()]}.cpp`, Buffer.from(rdoc.code));
+                }
+            }));
+            await outputFile('simtmp/code.zip', zip.toBuffer());
+            exec('unzip simtmp/code.zip -d simtmp');
+
+            exec('chmod 777 simtmp/sim');
+            exec('./simtmp/sim -p simtmp/*.cpp > simtmp/output.txt');
+            exec('./simtmp/process < simtmp/output.txt > simtmp/process.csv');
+
+            exec('chmod 777 simtmp/process.csv');
+            const csvstr: string = readFileSync('simtmp/process.csv').toString();
+            const str = csvstr.split('\n');
+            const arr1: any = [];
+            const arr2: any = [];
+            const arr3: any = [];
+            const arr4: any = [];
+            const arr: any = [];
+            str.forEach((line) => {
+                arr1.push(line.toString().split(','));
+            });
+            arr1.forEach((line) => {
+                arr2.push(line.toString().replaceAll(',', '_').split('_'));
+            });
+            arr2.forEach((line) => {
+                arr3.push(line.toString().replaceAll('P', '').split(','));
+            });
+            arr3.forEach((line) => {
+                arr4.push(line.toString().replaceAll('R', '').split(','));
+            });
+            arr4.forEach((line) => {
+                arr.push(line.toString().replaceAll('U', '').split(','));
+            });
+            await coll.deleteMany({ contest: tid });
+            for (let i = 0; i < arr.length - 1; i++) {
+                const user1 = arr[i][0];
+                const record1 = arr[i][2];
+                const user2 = arr[i][3];
+                const record2 = arr[i][5];
+                const similarity = arr[i][6];
+                coll.insertOne({
+                    _id: new ObjectId(),
+                    contest: tid,
+                    user1,
+                    record1,
+                    user2,
+                    record2,
+                    similarity,
+                    status: 0,
+                });
+            }
+        } catch (err) {
+            throw new ForbiddenError(err);
+        }
+        this.back();
+    }
+}
+
 export async function apply(ctx: Context) {
     ctx.Route('contest_create', '/contest/create', ContestEditHandler);
     ctx.Route('contest_main', '/contest', ContestListHandler, PERM.PERM_VIEW_CONTEST);
@@ -774,4 +886,5 @@ export async function apply(ctx: Context) {
     ctx.Route('contest_file_download', '/contest/:tid/file/:filename', ContestFileDownloadHandler, PERM.PERM_VIEW_CONTEST);
     ctx.Route('contest_user', '/contest/:tid/user', ContestUserHandler, PERM.PERM_VIEW_CONTEST);
     ctx.Route('contest_balloon', '/contest/:tid/balloon', ContestBalloonHandler, PERM.PERM_VIEW_CONTEST);
+    ctx.Route('contest_sim', '/contest/:tid/sim', ContestSimHandler, PERM.PERM_EDIT_CONTEST);
 }
