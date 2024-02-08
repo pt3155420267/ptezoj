@@ -851,7 +851,7 @@ export class ContestSimHandler extends ContestManagementBaseHandler {
                     record1,
                     user2,
                     record2,
-                    similarity,
+                    similarity: Number(similarity),
                     status: 0,
                 });
             }
