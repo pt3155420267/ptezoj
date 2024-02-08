@@ -11,13 +11,10 @@ int main(){
 	getline(cin,tmp); // \n
 	string a,b,c; int d; string e,f,g,h;
 	while(cin>>a>>b>>c>>d>>e>>f>>g>>h){
-		int pos;
-		a.erase(a.begin(),a.begin()+7);
-		for(pos = a.size();a[pos] != '_';pos--);
-		a.erase(a.begin() + pos,a.end());
-		g.erase(g.begin(),g.begin()+7);
-		for(pos = g.size();g[pos] != '_';pos--);
-		g.erase(g.begin() + pos,g.end());
+		a.erase(a.begin(),a.begin() + 7);
+		a.erase(a.end() - 4,a.end());
+		g.erase(g.begin(),g.begin() + 7);
+		g.erase(g.end() - 4,g.end());
 		cout<<a<<","<<g<<","<<d<<endl;
 	}
 	return 0;

@@ -773,9 +773,9 @@ export class ContestSimHandler extends ContestManagementBaseHandler {
     async get(domainId: string, tid: ObjectId) {
         this.response.template = 'contest_sim.html';
         this.response.pjax = 'contest_sim.html';
-        const sdocs = await coll.find({ contest: tid }).toArray();
-        const [udict1] = await Promise.all([user.getList(domainId, sdocs.map((sdoc) => sdoc.user1))]);
-        const [udict2] = await Promise.all([user.getList(domainId, sdocs.map((sdoc) => sdoc.user2))]);
+        const sdocs: SIMdoc[] = await coll.find({ contest: tid }).sort({ similarity: -1 }).toArray();
+        const udict1 = await user.getList(domainId, sdocs.map((sdoc) => Number(sdoc.user1)));
+        const udict2 = await user.getList(domainId, sdocs.map((sdoc) => Number(sdoc.user2)));
         this.response.body = {
             sdocs,
             udict1,
@@ -797,8 +797,7 @@ export class ContestSimHandler extends ContestManagementBaseHandler {
             const rnames = {};
             for (const tsdoc of tsdocs) {
                 for (const j of tsdoc.journal || []) {
-                    let name = `U${tsdoc.uid}_P${j.pid}_R${j.rid}`;
-                    if (typeof j.score === 'number') name += `_S${j.status || 0}@${j.score}`;
+                    const name = `${tsdoc.uid}_${j.pid}_${j.rid}`;
                     rnames[j.rid] = name;
                 }
             }
@@ -819,34 +818,23 @@ export class ContestSimHandler extends ContestManagementBaseHandler {
                 }
             }));
             await outputFile('simtmp/code.zip', zip.toBuffer());
-            exec('unzip simtmp/code.zip -d simtmp');
+            await Promise.all([exec('unzip simtmp/code.zip -d simtmp')]);
 
             exec('chmod 777 simtmp/sim');
-            exec('./simtmp/sim -p simtmp/*.cpp > simtmp/output.txt');
-            exec('./simtmp/process < simtmp/output.txt > simtmp/process.csv');
+            await Promise.all([exec('./simtmp/sim -p simtmp/*.cpp > simtmp/output.txt')]);
 
+            await Promise.all([exec('./simtmp/process < simtmp/output.txt > simtmp/process.csv')]);
             exec('chmod 777 simtmp/process.csv');
+
             const csvstr: string = readFileSync('simtmp/process.csv').toString();
             const str = csvstr.split('\n');
             const arr1: any = [];
-            const arr2: any = [];
-            const arr3: any = [];
-            const arr4: any = [];
             const arr: any = [];
             str.forEach((line) => {
                 arr1.push(line.toString().split(','));
             });
             arr1.forEach((line) => {
-                arr2.push(line.toString().replaceAll(',', '_').split('_'));
-            });
-            arr2.forEach((line) => {
-                arr3.push(line.toString().replaceAll('P', '').split(','));
-            });
-            arr3.forEach((line) => {
-                arr4.push(line.toString().replaceAll('R', '').split(','));
-            });
-            arr4.forEach((line) => {
-                arr.push(line.toString().replaceAll('U', '').split(','));
+                arr.push(line.toString().replaceAll(',', '_').split('_'));
             });
             await coll.deleteMany({ contest: tid });
             for (let i = 0; i < arr.length - 1; i++) {
