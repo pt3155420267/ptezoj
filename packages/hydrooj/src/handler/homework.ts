@@ -13,7 +13,7 @@ import problem from '../model/problem';
 import record from '../model/record';
 import user from '../model/user';
 import { Handler, param, Types } from '../service/server';
-import { ContestCodeHandler, ContestScoreboardHandler } from './contest';
+import { ContestCodeHandler, ContestScoreboardHandler, ContestSimHandler } from './contest';
 
 const validatePenaltyRules = (input: string) => yaml.load(input);
 const convertPenaltyRules = validatePenaltyRules;
@@ -231,6 +231,10 @@ class HomeworkEditHandler extends Handler {
     }
 }
 
+class HomeworkSimHandler extends Handler {
+    
+}
+
 export async function apply(ctx) {
     ctx.Route('homework_main', '/homework', HomeworkMainHandler, PERM.PERM_VIEW_HOMEWORK);
     ctx.Route('homework_create', '/homework/create', HomeworkEditHandler);
@@ -241,5 +245,6 @@ export async function apply(ctx) {
         ContestScoreboardHandler, PERM.PERM_VIEW_HOMEWORK_SCOREBOARD,
     );
     ctx.Route('homework_code', '/homework/:tid/code', ContestCodeHandler, PERM.PERM_VIEW_HOMEWORK);
+    ctx.Route('homework_sim', '/homework/:tid/sim', ContestSimHandler, PERM.PERM_EDIT_CONTEST);
     ctx.Route('homework_edit', '/homework/:tid/edit', HomeworkEditHandler);
 }
