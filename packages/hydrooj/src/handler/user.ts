@@ -118,9 +118,9 @@ class UserLoginHandler extends Handler {
             } else throw new ValidationError('2FA', 'Authn');
         }
         udoc.checkPassword(password);
+        await token.delByUid(udoc._id);
         await user.setById(udoc._id, { loginat: new Date(), loginip: this.request.ip });
         if (!udoc.hasPriv(PRIV.PRIV_USER_PROFILE)) throw new BlacklistedError(uname, udoc.banReason);
-        token.delByUid(udoc._id);
         this.session.viewLang = '';
         this.session.uid = udoc._id;
         this.session.sudo = null;
