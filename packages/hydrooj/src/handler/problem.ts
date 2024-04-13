@@ -54,7 +54,6 @@ registerValue('Problem', [
     ['pid', 'String'],
     ['title', 'String!'],
     ['content', 'String!'],
-    ['config', 'String!'],
     ['data', '[FileInfo]'],
     ['additional_file', '[FileInfo]'],
     ['nSubmit', 'Int'],
@@ -137,7 +136,7 @@ export class ProblemMainHandler extends Handler {
     @param('pjax', Types.Boolean)
     async get(domainId: string, page = 1, q = '', limit: number, pjax = false) {
         this.response.template = 'problem_main.html';
-        if (!limit || limit > system.get('pagination.problem') || page > 1) limit = system.get('pagination.problem');
+        if (!limit || limit > this.ctx.setting.get('pagination.problem') || page > 1) limit = this.ctx.setting.get('pagination.problem');
         // eslint-disable-next-line @typescript-eslint/no-shadow
         const query = buildQuery(this.user);
         const psdict = {};
@@ -539,7 +538,6 @@ export class ProblemSubmitHandler extends ProblemDetailHandler {
             domainId, this.pdoc.docId, this.user._id, lang, code, true,
             pretest ? { input, type: 'pretest' } : { contest: tid, files, type: 'judge' },
         );
-        const rdoc = await record.get(domainId, rid);
         if (!pretest) {
             await Promise.all([
                 problem.inc(domainId, this.pdoc.docId, 'nSubmit', 1),
@@ -548,10 +546,9 @@ export class ProblemSubmitHandler extends ProblemDetailHandler {
                 tid && contest.updateStatus(domainId, tid, this.user._id, rid, this.pdoc.docId),
             ]);
         }
-        this.ctx.broadcast('record/change', rdoc);
         if (tid && !pretest && !contest.canShowSelfRecord.call(this, this.tdoc)) {
             this.response.body = { tid };
-            this.response.redirect = this.url(this.tdoc.rule === 'homework' ? 'homework_detail' : 'contest_detail', { tid });
+            this.response.redirect = this.url(this.tdoc.rule === 'homework' ? 'homework_detail' : 'contest_problemlist', { tid });
         } else {
             this.response.body = { rid };
             this.response.redirect = this.url('record_detail', { rid });
@@ -607,9 +604,7 @@ export class ProblemHackHandler extends ProblemDetailHandler {
             this.rdoc.lang, this.rdoc.code, true,
             { contest: tid, type: 'hack', files: { hack: `${id}#input.txt` } },
         );
-        const rdoc = await record.get(domainId, rid);
         // TODO contest: update status;
-        this.ctx.broadcast('record/change', rdoc);
         this.response.body = { rid };
         this.response.redirect = this.url('record_detail', { rid });
     }
@@ -819,7 +814,9 @@ export class ProblemFileDownloadHandler extends ProblemDetailHandler {
     @query('type', Types.Range(['additional_file', 'testdata']), true)
     @param('filename', Types.Filename)
     @param('noDisposition', Types.Boolean)
-    async get(domainId: string, type = 'additional_file', filename: string, noDisposition = false) {
+    @query('tid', Types.ObjectId, true)
+    async get(domainId: string, type = 'additional_file', filename: string, noDisposition = false, tid: ObjectId) {
+        if (!tid) this.checkPerm(PERM.PERM_VIEW_PROBLEM);
         if (this.pdoc.reference) {
             if (type === 'testdata') throw new ProblemIsReferencedError('download testdata');
             this.pdoc = await problem.get(this.pdoc.reference.domainId, this.pdoc.reference.pid);
@@ -1045,7 +1042,7 @@ export async function apply(ctx) {
     ctx.Route('problem_edit', '/p/:pid/edit', ProblemEditHandler);
     ctx.Route('problem_config', '/p/:pid/config', ProblemConfigHandler);
     ctx.Route('problem_files', '/p/:pid/files', ProblemFilesHandler, PERM.PERM_VIEW_PROBLEM);
-    ctx.Route('problem_file_download', '/p/:pid/file/:filename', ProblemFileDownloadHandler, PERM.PERM_VIEW_PROBLEM);
+    ctx.Route('problem_file_download', '/p/:pid/file/:filename', ProblemFileDownloadHandler);
     ctx.Route('problem_solution', '/p/:pid/solution', ProblemSolutionHandler, PERM.PERM_VIEW_PROBLEM);
     ctx.Route('problem_solution_detail', '/p/:pid/solution/:sid', ProblemSolutionHandler, PERM.PERM_VIEW_PROBLEM);
     ctx.Route('problem_solution_raw', '/p/:pid/solution/:psid/raw', ProblemSolutionRawHandler, PERM.PERM_VIEW_PROBLEM);

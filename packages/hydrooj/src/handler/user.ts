@@ -117,7 +117,7 @@ class UserLoginHandler extends Handler {
                 await token.del(authnChallenge, token.TYPE_WEBAUTHN);
             } else throw new ValidationError('2FA', 'Authn');
         }
-        udoc.checkPassword(password);
+        await udoc.checkPassword(password);
         await token.delByUid(udoc._id);
         await user.setById(udoc._id, { loginat: new Date(), loginip: this.request.ip });
         if (!udoc.hasPriv(PRIV.PRIV_USER_PROFILE)) throw new BlacklistedError(uname, udoc.banReason);
@@ -126,6 +126,7 @@ class UserLoginHandler extends Handler {
         this.session.sudo = null;
         this.session.scope = PERM.PERM_ALL.toString();
         this.session.save = rememberme;
+        this.session.recreate = true;
         this.response.redirect = redirect || ((this.request.referer || '/login').endsWith('/login')
             ? this.url('homepage') : this.request.referer);
     }
@@ -153,7 +154,7 @@ class UserSudoHandler extends Handler {
             await token.del(authnChallenge, token.TYPE_WEBAUTHN);
         } else if (this.user.tfa && tfa) {
             if (!verifyTFA(this.user._tfa, tfa)) throw new InvalidTokenError('2FA');
-        } else this.user.checkPassword(password);
+        } else await this.user.checkPassword(password);
         this.session.sudo = Date.now();
         if (this.session.sudoArgs.method.toLowerCase() !== 'get') {
             this.response.template = 'user_sudo_redirect.html';
@@ -328,6 +329,7 @@ class UserRegisterWithCodeHandler extends Handler {
         this.session.uid = uid;
         this.session.sudoUid = null;
         this.session.scope = PERM.PERM_ALL.toString();
+        this.session.recreate = true;
         this.response.redirect = tdoc.redirect || this.url('home_settings', { category: 'preference' });
     }
 }
@@ -446,7 +448,7 @@ class UserDetailHandler extends Handler {
 
 class UserDeleteHandler extends Handler {
     async post({ password }) {
-        this.user.checkPassword(password);
+        await this.user.checkPassword(password);
         const tid = await ScheduleModel.add({
             executeAfter: moment().add(7, 'days').toDate(),
             type: 'script',
@@ -487,6 +489,7 @@ class OauthCallbackHandler extends Handler {
                     await user.setById(udoc._id, { loginat: new Date(), loginip: this.request.ip });
                     this.session.uid = udoc._id;
                     this.session.scope = PERM.PERM_ALL.toString();
+                    this.session.recreate = true;
                     this.response.redirect = '/';
                     return;
                 }

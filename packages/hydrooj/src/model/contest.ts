@@ -287,7 +287,9 @@ const oi = buildContestRule({
                 display[j.pid] = j;
             }
         }
-        for (const i in display) score += display[i].score || 0;
+        for (const i in display) {
+            score += ((tdoc.score?.[i] || 100) * (display[i].score || 0)) / 100;
+        }
         return { score, detail, display };
     },
     showScoreboard: (tdoc, now) => now > tdoc.endAt,
@@ -326,6 +328,10 @@ const oi = buildContestRule({
             { type: 'rank', value: rank.toString() },
             { type: 'user', value: udoc.uname, raw: tsdoc.uid },
         ];
+        const displayScore = (pid: number, score?: number) => {
+            if (typeof score !== 'number') return '-';
+            return score * ((tdoc.score?.[pid] || 100) / 100);
+        };
         if (config.isExport) {
             row.push({ type: 'string', value: udoc.school || '' });
             row.push({ type: 'string', value: udoc.realname || '' });
@@ -343,22 +349,26 @@ const oi = buildContestRule({
             // eslint-disable-next-line @typescript-eslint/no-use-before-define
             const node: ScoreboardNode = (!config.isExport && !config.lockAt && isDone(tdoc)
                 && meta?.psdict?.[index]?.rid
-                && tsddict[pid]?.rid?.toHexString() !== meta?.psdict?.[index]?.rid?.toHexString())
+                && tsddict[pid]?.rid?.toHexString() !== meta?.psdict?.[index]?.rid?.toHexString()
+                && meta?.psdict?.[index]?.rid?.getTimestamp() > tdoc.endAt)
                 ? {
                     type: 'records',
                     value: '',
                     raw: [{
-                        value: tsddict[pid]?.score ?? '-',
+                        value: displayScore(pid, tsddict[pid]?.score),
                         raw: tsddict[pid]?.rid || null,
+                        score: tsddict[pid]?.score,
                     }, {
-                        value: meta?.psdict?.[index]?.score ?? '-',
+                        value: displayScore(pid, meta?.psdict?.[index]?.score),
                         raw: meta?.psdict?.[index]?.rid ?? null,
+                        score: meta?.psdict?.[index]?.score,
                     }],
                 } : {
                     type: 'record',
-                    value: `${tsddict[pid]?.score ?? '-'}${tsddict[pid]?.npending
+                    value: `${displayScore(pid, tsddict[pid]?.score)}${tsddict[pid]?.npending
                         ? `<span style="color:orange">+${tsddict[pid]?.npending}</span>` : ''}`,
                     raw: tsddict[pid]?.rid || null,
+                    score: tsddict[pid]?.score,
                 };
             if (tsddict[pid]?.status === STATUS.STATUS_ACCEPTED && tsddict[pid]?.rid.getTimestamp().getTime() === meta?.first?.[pid]) {
                 node.style = 'background-color: rgb(217, 240, 199);';
@@ -452,7 +462,7 @@ const strictioi = buildContestRule({
             j.status = Math.max(...Object.values(subtasks[j.pid]).map((i) => i.status));
             if (!detail[j.pid] || detail[j.pid].score < j.score) detail[j.pid] = { ...j, subtasks: subtasks[j.pid] };
         }
-        for (const i in detail) score += detail[i].score;
+        for (const i in detail) score += ((tdoc.score?.[i] || 100) * (detail[i].score || 0)) / 100;
         return { score, detail };
     },
     async scoreboardRow(config, _, tdoc, pdict, udoc, rank, tsdoc, meta) {
@@ -474,9 +484,10 @@ const strictioi = buildContestRule({
         for (const pid of tdoc.pids) {
             row.push({
                 type: 'record',
-                value: tsddict[pid]?.score || '',
+                value: ((tsddict[pid]?.score || 0) * ((tdoc.score?.[pid] || 100) / 100)).toString() || '',
                 hover: Object.values(tsddict[pid]?.subtasks || {}).map((i: SubtaskResult) => `${STATUS_SHORT_TEXTS[i.status]} ${i.score}`).join(','),
                 raw: tsddict[pid]?.rid,
+                score: tsddict[pid]?.score,
                 style: tsddict[pid]?.status === STATUS.STATUS_ACCEPTED && tsddict[pid]?.rid.getTimestamp().getTime() === meta?.first?.[pid]
                     ? 'background-color: rgb(217, 240, 199);'
                     : undefined,
@@ -512,8 +523,9 @@ const ledo = buildContestRule({
         let originalScore = 0;
         for (const pid of tdoc.pids) {
             if (!detail[pid]) continue;
-            score += detail[pid].penaltyScore;
-            originalScore += detail[pid].score;
+            const rate = (tdoc.score?.[pid] || 100) / 100;
+            score += detail[pid].penaltyScore * rate;
+            originalScore += detail[pid].score * rate;
         }
         return {
             score, originalScore, detail,
@@ -542,9 +554,10 @@ const ledo = buildContestRule({
         for (const pid of tdoc.pids) {
             row.push({
                 type: 'record',
-                value: tsddict[pid]?.penaltyScore?.toString() || '',
+                value: ((tsddict[pid]?.penaltyScore || 0) * ((tdoc.score?.[pid] || 100) / 100)).toString(),
                 hover: tsddict[pid]?.ntry ? `-${tsddict[pid].ntry} (${Math.round(Math.max(0.7, 0.95 ** tsddict[pid].ntry) * 100)}%)` : '',
                 raw: tsddict[pid]?.rid,
+                score: tsddict[pid]?.score,
                 style: tsddict[pid]?.status === STATUS.STATUS_ACCEPTED && tsddict[pid]?.rid.getTimestamp().getTime() === meta?.first?.[pid]
                     ? 'background-color: rgb(217, 240, 199);'
                     : undefined,
@@ -574,17 +587,18 @@ const homework = buildContestRule({
         }
 
         function penaltyScore(jdoc) {
+            const rate = (tdoc.score?.[jdoc.pid] || 100) / 100;
             const exceedSeconds = Math.floor(
                 (jdoc.rid.getTimestamp().getTime() - tdoc.penaltySince.getTime()) / 1000,
             );
-            if (exceedSeconds < 0) return jdoc.score;
+            if (exceedSeconds < 0) return rate * jdoc.score;
             let coefficient = 1;
             const keys = Object.keys(tdoc.penaltyRules).map(parseFloat).sort((a, b) => a - b);
             for (const i of keys) {
                 if (i * 3600 <= exceedSeconds) coefficient = tdoc.penaltyRules[i];
                 else break;
             }
-            return jdoc.score * coefficient;
+            return rate * jdoc.score * coefficient;
         }
         const detail = [];
         for (const j in effective) {
@@ -606,8 +620,14 @@ const homework = buildContestRule({
         const columns: ScoreboardNode[] = [
             { type: 'rank', value: _('Rank') },
             { type: 'user', value: _('User') },
-            { type: 'total_score', value: _('Score') },
         ];
+        if (config.isExport) {
+            columns.push({ type: 'email', value: _('Email') });
+            columns.push({ type: 'string', value: _('School') });
+            columns.push({ type: 'string', value: _('Name') });
+            columns.push({ type: 'string', value: _('Student ID') });
+        }
+        columns.push({ type: 'total_score', value: _('Score') });
         if (config.isExport) {
             columns.push({ type: 'string', value: _('Original Score') });
         }
@@ -649,11 +669,14 @@ const homework = buildContestRule({
                 value: udoc.uname,
                 raw: tsdoc.uid,
             },
-            {
-                type: 'string',
-                value: tsdoc.penaltyScore || 0,
-            },
         ];
+        if (config.isExport) {
+            row.push({ type: 'email', value: udoc.mail });
+            row.push({ type: 'string', value: udoc.school || '' });
+            row.push({ type: 'string', value: udoc.displayName || '' });
+            row.push({ type: 'string', value: udoc.studentId || '' });
+        }
+        row.push({ type: 'string', value: tsdoc.penaltyScore || 0 });
         if (config.isExport) {
             row.push({ type: 'string', value: tsdoc.score || 0 });
         }
@@ -678,7 +701,7 @@ const homework = buildContestRule({
             } else {
                 row.push({
                     type: 'record',
-                    score: tsddict[pid]?.penaltyScore || 0,
+                    score: tsddict[pid]?.score,
                     value: colScore === colOriginalScore
                         ? '{0}\n{1}'.format(colScore, colTimeStr)
                         : '{0} / {1}\n{2}'.format(colScore, colOriginalScore, colTimeStr),
@@ -747,7 +770,6 @@ export async function del(domainId: string, tid: ObjectId) {
     await Promise.all([
         document.deleteOne(domainId, document.TYPE_CONTEST, tid),
         document.deleteMultiStatus(domainId, document.TYPE_CONTEST, { docId: tid }),
-        document.deleteMulti(domainId, document.TYPE_DISCUSSION, { parentType: document.TYPE_CONTEST, parentId: tid }),
     ]);
 }
 
@@ -951,10 +973,10 @@ export function getClarification(domainId: string, did: ObjectId) {
     return document.get(domainId, document.TYPE_CONTEST_CLARIFICATION, did);
 }
 
-export function getMultiClarification(domainId: string, tid: ObjectId, owner = 0) {
+export function getMultiClarification(domainId: string, tid: ObjectId, owner?: number) {
     return document.getMulti(
         domainId, document.TYPE_CONTEST_CLARIFICATION,
-        { parentType: document.TYPE_CONTEST, parentId: tid, ...(owner ? { owner: { $in: [owner, 0] } } : {}) },
+        { parentType: document.TYPE_CONTEST, parentId: tid, ...(typeof owner === 'number' ? { owner: { $in: [owner, 0] } } : {}) },
     ).sort('_id', -1).toArray();
 }
 

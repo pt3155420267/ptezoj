@@ -216,8 +216,8 @@ class HomeSecurityHandler extends Handler {
         if (this.session.sudoUid) {
             const udoc = await user.getById(domainId, this.session.sudoUid);
             if (!udoc) throw new UserNotFoundError(this.session.sudoUid);
-            udoc.checkPassword(current);
-        } else this.user.checkPassword(current);
+            await udoc.checkPassword(current);
+        } else await this.user.checkPassword(current);
         await user.setPassword(this.user._id, password);
         await token.delByUid(this.user._id);
         this.response.redirect = this.url('user_login');
@@ -232,8 +232,8 @@ class HomeSecurityHandler extends Handler {
         if (this.session.sudoUid) {
             const udoc = await user.getById(domainId, this.session.sudoUid);
             if (!udoc) throw new UserNotFoundError(this.session.sudoUid);
-            udoc.checkPassword(current);
-        } else this.user.checkPassword(current);
+            await udoc.checkPassword(current);
+        } else await this.user.checkPassword(current);
         const udoc = await user.getByEmail(domainId, email);
         if (udoc) throw new UserAlreadyExistError(email);
         await this.limitRate('send_mail', 3600, 30);
@@ -602,6 +602,6 @@ export async function apply(ctx: Context) {
     ctx.Route('home_avatar', '/home/avatar', HomeAvatarHandler, PRIV.PRIV_USER_PROFILE);
     ctx.Route('home_domain', '/home/domain', HomeDomainHandler, PRIV.PRIV_USER_PROFILE);
     ctx.Route('home_domain_create', '/home/domain/create', HomeDomainCreateHandler, PRIV.PRIV_CREATE_DOMAIN);
-    if (system.get('server.message')) ctx.Route('home_messages', '/home/messages', HomeMessagesHandler, PRIV.PRIV_USER_PROFILE);
+    ctx.Route('home_messages', '/home/messages', HomeMessagesHandler, PRIV.PRIV_USER_PROFILE);
     ctx.Connection('home_messages_conn', '/home/messages-conn', HomeMessagesConnectionHandler, PRIV.PRIV_USER_PROFILE);
 }
