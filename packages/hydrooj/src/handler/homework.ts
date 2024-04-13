@@ -20,7 +20,7 @@ import user from '../model/user';
 import {
     Handler, param, post, Types,
 } from '../service/server';
-import { ContestCodeHandler, ContestScoreboardHandler } from './contest';
+import { ContestCodeHandler, ContestScoreboardHandler, ContestSimHandler } from './contest';
 
 const validatePenaltyRules = (input: string) => yaml.load(input);
 const convertPenaltyRules = validatePenaltyRules;
